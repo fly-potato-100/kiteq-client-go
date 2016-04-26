@@ -1,11 +1,12 @@
 package core
 
 import (
+	"github.com/blackbeans/kiteq-common/binding"
 	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/store"
+
 	"github.com/blackbeans/turbo"
 	"github.com/golang/protobuf/proto"
-	"kiteq/binding"
 	"kiteq/server"
 	"log"
 	"testing"
