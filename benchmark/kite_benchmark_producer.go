@@ -123,7 +123,7 @@ func main() {
 	clients := make([]*client.KiteQClient, 0, *k)
 	for j := 0; j < *k; j++ {
 
-		kiteClient := client.NewKiteQClient(*zkhost, "pb-mts-test", "123456", &defualtListener{})
+		kiteClient := client.NewKiteQClient(*zkhost, "go-kite-test", "123456", &defualtListener{})
 		kiteClient.SetTopics([]string{"trade"})
 		kiteClient.Start()
 		clients = append(clients, kiteClient)
@@ -132,7 +132,6 @@ func main() {
 		for i := 0; i < *c; i++ {
 			go func(kite *client.KiteQClient) {
 				wg.Add(1)
-
 				for !stop {
 					if *tx {
 						msg := buildBytesMessage(false)
@@ -155,36 +154,37 @@ func main() {
 					}
 				}
 				wg.Done()
+
 			}(kiteClient)
 		}
 
 		time.Sleep(10 * time.Second)
-	}
 
-	var s = make(chan os.Signal, 1)
-	signal.Notify(s, syscall.SIGKILL, syscall.SIGUSR1)
-	//是否收到kill的命令
-	for {
-		cmd := <-s
-		if cmd == syscall.SIGKILL {
-			break
-		} else if cmd == syscall.SIGUSR1 {
-			//如果为siguser1则进行dump内存
-			unixtime := time.Now().Unix()
-			path := "./heapdump-producer" + fmt.Sprintf("%d", unixtime)
-			f, err := os.Create(path)
-			if nil != err {
-				continue
-			} else {
-				debug.WriteHeapDump(f.Fd())
+		var s = make(chan os.Signal, 1)
+		signal.Notify(s, syscall.SIGKILL, syscall.SIGUSR1)
+		//是否收到kill的命令
+		for {
+			cmd := <-s
+			if cmd == syscall.SIGKILL {
+				break
+			} else if cmd == syscall.SIGUSR1 {
+				//如果为siguser1则进行dump内存
+				unixtime := time.Now().Unix()
+				path := "./heapdump-producer" + fmt.Sprintf("%d", unixtime)
+				f, err := os.Create(path)
+				if nil != err {
+					continue
+				} else {
+					debug.WriteHeapDump(f.Fd())
+				}
 			}
 		}
-	}
 
-	wg.Wait()
+		wg.Wait()
 
-	for _, k := range clients {
-		k.Destory()
+		for _, k := range clients {
+			k.Destory()
+		}
 	}
 }
 
