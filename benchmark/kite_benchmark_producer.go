@@ -57,7 +57,8 @@ func buildBytesMessage(commit bool) *protocol.BytesMessage {
 		DeliverLimit: proto.Int32(100),
 		GroupId:      proto.String("go-kite-test"),
 		Commit:       proto.Bool(commit),
-		Fly:          proto.Bool(false)}
+		Fly:          proto.Bool(false),
+		CreateTime:   proto.Int64(time.Now().Unix())}
 
 	entity.Body = body
 
@@ -75,7 +76,8 @@ func buildStringMessage(commit bool) *protocol.StringMessage {
 		DeliverLimit: proto.Int32(100),
 		GroupId:      proto.String("go-kite-test"),
 		Commit:       proto.Bool(commit),
-		Fly:          proto.Bool(false)}
+		Fly:          proto.Bool(false),
+		CreateTime:   proto.Int64(time.Now().Unix())}
 
 	entity.Body = proto.String("hello world")
 

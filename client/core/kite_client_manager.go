@@ -169,6 +169,9 @@ func (self *KiteClientManager) SetBindings(bindings []*binding.Binding) {
 
 //发送事务消息
 func (self *KiteClientManager) SendTxMessage(msg *protocol.QMessage, doTranscation DoTranscation) (err error) {
+
+	msg.GetHeader().GroupId = protocol.MarshalPbString(self.ga.GroupId)
+
 	//路由选择策略
 	c, err := self.selectKiteClient(msg.GetHeader())
 	if nil != err {
@@ -202,6 +205,9 @@ func (self *KiteClientManager) SendTxMessage(msg *protocol.QMessage, doTranscati
 
 //发送消息
 func (self *KiteClientManager) SendMessage(msg *protocol.QMessage) error {
+	//fix header groupId
+	msg.GetHeader().GroupId = protocol.MarshalPbString(self.ga.GroupId)
+	//select client
 	c, err := self.selectKiteClient(msg.GetHeader())
 	if nil != err {
 		return err

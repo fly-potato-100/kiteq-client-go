@@ -25,12 +25,19 @@ func newKitClient(remoteClient *c.RemotingClient) *kiteClient {
 //发送事务的确认,无需等待服务器反馈
 func (self *kiteClient) sendTxAck(message *protocol.QMessage,
 	txstatus protocol.TxStatus, feedback string) error {
+	//写入时间
+	if message.GetHeader().GetCreateTime() <= 0 {
+		message.GetHeader().CreateTime = protocol.MarshalInt64(time.Now().Unix())
+	}
 	txpacket := protocol.MarshalTxACKPacket(message.GetHeader(), txstatus, feedback)
 	return self.innerSendMessage(protocol.CMD_TX_ACK, txpacket, 0)
 }
 
 func (self *kiteClient) sendMessage(message *protocol.QMessage) error {
-
+	//写入时间
+	if message.GetHeader().GetCreateTime() <= 0 {
+		message.GetHeader().CreateTime = protocol.MarshalInt64(time.Now().Unix())
+	}
 	data, err := protocol.MarshalPbMessage(message.GetPbMessage())
 	if nil != err {
 		return err
