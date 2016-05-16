@@ -1,7 +1,8 @@
 package core
 
 import (
-	"github.com/blackbeans/kiteq-common/binding"
+	"github.com/blackbeans/kiteq-common/registry"
+	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/codec"
@@ -10,10 +11,10 @@ import (
 	"strings"
 )
 
-func (self *KiteClientManager) NodeChange(path string, eventType binding.ZkEvent, children []string) {
+func (self *KiteClientManager) NodeChange(path string, eventType registry.RegistryEvent, children []string) {
 
 	//如果是订阅关系变更则处理
-	if strings.HasPrefix(path, binding.KITEQ_SERVER) {
+	if strings.HasPrefix(path, registry.KITEQ_SERVER) {
 		//获取topic
 		split := strings.Split(path, "/")
 		if len(split) < 4 {
@@ -100,7 +101,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 	}
 }
 
-func (self *KiteClientManager) DataChange(path string, binds []*binding.Binding) {
+func (self *KiteClientManager) DataChange(path string, binds []*bind.Binding) {
 	//IGNORE
 	log.InfoLog("kite_client", "KiteClientManager|DataChange|%s|%s\n", path, binds)
 }

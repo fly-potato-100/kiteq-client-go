@@ -3,8 +3,8 @@ package client
 import (
 	"github.com/blackbeans/kiteq-client-go/client/core"
 	"github.com/blackbeans/kiteq-client-go/client/listener"
-	"github.com/blackbeans/kiteq-common/binding"
 	"github.com/blackbeans/kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/registry/bind"
 )
 
 type KiteQClient struct {
@@ -24,7 +24,7 @@ func (self *KiteQClient) SetTopics(topics []string) {
 	self.kclientManager.SetPublishTopics(topics)
 }
 
-func (self *KiteQClient) SetBindings(bindings []*binding.Binding) {
+func (self *KiteQClient) SetBindings(bindings []*bind.Binding) {
 	self.kclientManager.SetBindings(bindings)
 
 }

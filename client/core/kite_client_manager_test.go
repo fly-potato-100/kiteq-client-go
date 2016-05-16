@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/blackbeans/kiteq-common/binding"
 	"github.com/blackbeans/kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/registry/bind"
 	"github.com/blackbeans/kiteq-common/store"
 
 	"github.com/blackbeans/turbo"
@@ -85,13 +85,13 @@ func init() {
 	kiteQ = server.NewKiteQServer(kc)
 
 	// 创建客户端
-	manager = NewKiteClientManager("localhost:2181", "ps-trade-a", "123456", l)
+	manager = NewKiteClientManager("zk://localhost:2181", "ps-trade-a", "123456", l)
 	manager.SetPublishTopics([]string{"trade"})
 
 	// 设置接收类型
 	manager.SetBindings(
-		[]*binding.Binding{
-			binding.Bind_Direct("ps-trade-a", "trade", "pay-succ", 1000, true),
+		[]*bind.Binding{
+			bind.Bind_Direct("ps-trade-a", "trade", "pay-succ", 1000, true),
 		},
 	)
 

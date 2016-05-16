@@ -4,8 +4,9 @@ import (
 	"errors"
 	"github.com/blackbeans/kiteq-client-go/client/handler"
 	"github.com/blackbeans/kiteq-client-go/client/listener"
-	"github.com/blackbeans/kiteq-common/binding"
 	"github.com/blackbeans/kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/registry"
+	"github.com/blackbeans/kiteq-common/registry/bind"
 	"github.com/blackbeans/kiteq-common/stat"
 	log "github.com/blackbeans/log4go"
 	"github.com/blackbeans/turbo"
@@ -28,20 +29,20 @@ type DoTranscation func(message *protocol.QMessage) (bool, error)
 const MAX_CLIENT_CONN = 10
 
 type KiteClientManager struct {
-	ga            *c.GroupAuth
-	zkAddr        string
-	topics        []string
-	binds         []*binding.Binding //订阅的关系
-	clientManager *c.ClientManager
-	kiteClients   map[string] /*topic*/ []*kiteClient //topic对应的kiteclient
-	zkManager     *binding.ZKManager
-	pipeline      *pipe.DefaultPipeline
-	lock          sync.RWMutex
-	rc            *turbo.RemotingConfig
-	flowstat      *stat.FlowStat
+	ga             *c.GroupAuth
+	registryUri    string
+	topics         []string
+	binds          []*bind.Binding //订阅的关系
+	clientManager  *c.ClientManager
+	kiteClients    map[string] /*topic*/ []*kiteClient //topic对应的kiteclient
+	registryCenter *registry.RegistryCenter
+	pipeline       *pipe.DefaultPipeline
+	lock           sync.RWMutex
+	rc             *turbo.RemotingConfig
+	flowstat       *stat.FlowStat
 }
 
-func NewKiteClientManager(zkAddr, groupId, secretKey string, listen listener.IListener) *KiteClientManager {
+func NewKiteClientManager(registryUri, groupId, secretKey string, listen listener.IListener) *KiteClientManager {
 
 	flowstat := stat.NewFlowStat("kiteclient-" + groupId)
 	rc := turbo.NewRemotingConfig(
@@ -61,17 +62,17 @@ func NewKiteClientManager(zkAddr, groupId, secretKey string, listen listener.ILi
 	pipeline.RegisteHandler("kiteclient-accept", handler.NewAcceptHandler("kiteclient-accept", listen))
 	pipeline.RegisteHandler("kiteclient-remoting", pipe.NewRemotingHandler("kiteclient-remoting", clientm))
 
-	zkManager := binding.NewZKManager(zkAddr)
+	registryCenter := registry.NewRegistryCenter(registryUri)
 	manager := &KiteClientManager{
-		ga:            c.NewGroupAuth(groupId, secretKey),
-		kiteClients:   make(map[string][]*kiteClient, 10),
-		topics:        make([]string, 0, 10),
-		pipeline:      pipeline,
-		clientManager: clientm,
-		rc:            rc,
-		flowstat:      flowstat,
-		zkAddr:        zkAddr,
-		zkManager:     zkManager}
+		ga:             c.NewGroupAuth(groupId, secretKey),
+		kiteClients:    make(map[string][]*kiteClient, 10),
+		topics:         make([]string, 0, 10),
+		pipeline:       pipeline,
+		clientManager:  clientm,
+		rc:             rc,
+		flowstat:       flowstat,
+		registryUri:    registryUri,
+		registryCenter: registryCenter}
 	//开启流量统计
 	manager.remointflow()
 	return manager
@@ -93,10 +94,10 @@ func (self *KiteClientManager) remointflow() {
 func (self *KiteClientManager) Start() {
 
 	//注册kiteqserver的变更
-	self.zkManager.RegisteWather(PATH_KITEQ_SERVER, self)
+	self.registryCenter.RegisteWatcher(PATH_KITEQ_SERVER, self)
 	hostname, _ := os.Hostname()
 	//推送本机到
-	err := self.zkManager.PublishTopics(self.topics, self.ga.GroupId, hostname)
+	err := self.registryCenter.PublishTopics(self.topics, self.ga.GroupId, hostname)
 	if nil != err {
 		log.Crashf("KiteClientManager|PublishTopics|FAIL|%s|%s\n", err, self.topics)
 	} else {
@@ -115,7 +116,7 @@ outter:
 
 	for _, topic := range self.topics {
 
-		hosts, err := self.zkManager.GetQServerAndWatch(topic)
+		hosts, err := self.registryCenter.GetQServerAndWatch(topic)
 		if nil != err {
 			log.Crashf("KiteClientManager|GetQServerAndWatch|FAIL|%s|%s\n", err, topic)
 		} else {
@@ -130,7 +131,7 @@ outter:
 
 	if len(self.binds) > 0 {
 		//订阅关系推送，并拉取QServer
-		err = self.zkManager.PublishBindings(self.ga.GroupId, self.binds)
+		err = self.registryCenter.PublishBindings(self.ga.GroupId, self.binds)
 		if nil != err {
 			log.Crashf("KiteClientManager|PublishBindings|FAIL|%s|%s\n", err, self.binds)
 		}
@@ -159,7 +160,7 @@ func (self *KiteClientManager) SetPublishTopics(topics []string) {
 	self.topics = append(self.topics, topics...)
 }
 
-func (self *KiteClientManager) SetBindings(bindings []*binding.Binding) {
+func (self *KiteClientManager) SetBindings(bindings []*bind.Binding) {
 	for _, b := range bindings {
 		b.GroupId = self.ga.GroupId
 	}
@@ -232,5 +233,5 @@ func (self *KiteClientManager) selectKiteClient(header *protocol.Header) (*kiteC
 }
 
 func (self *KiteClientManager) Destory() {
-	self.zkManager.Close()
+	self.registryCenter.Close()
 }

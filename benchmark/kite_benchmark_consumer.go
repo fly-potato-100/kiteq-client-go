@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/blackbeans/kiteq-common/binding"
 	"github.com/blackbeans/kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
 	"kiteq-client-go/client"
 	"net/http"
@@ -48,7 +48,7 @@ func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
 
 func main() {
 	logxml := flag.String("logxml", "../log/log_consumer.xml", "-logxml=../log/log_consumer.xml")
-	zkhost := flag.String("zkhost", "localhost:2181", "-zkhost=localhost:2181")
+	zkhost := flag.String("registryUri", "zk://localhost:2181", "-registryUri=zk://localhost:2181")
 	flag.Parse()
 	runtime.GOMAXPROCS(8)
 
@@ -62,8 +62,8 @@ func main() {
 	go lis.monitor()
 
 	kite := client.NewKiteQClient(*zkhost, "s-mts-test", "123456", lis)
-	kite.SetBindings([]*binding.Binding{
-		binding.Bind_Direct("s-mts-test", "trade", "pay-succ", 1000, true),
+	kite.SetBindings([]*bind.Binding{
+		bind.Bind_Direct("s-mts-test", "trade", "pay-succ", 1000, true),
 	})
 	kite.Start()
 

@@ -89,7 +89,7 @@ func main() {
 	k := flag.Int("k", 1, "-k=1  //kiteclient num ")
 	c := flag.Int("c", 1, "-c=100")
 	tx := flag.Bool("tx", false, "-tx=true send Tx Message")
-	zkhost := flag.String("zkhost", "localhost:2181", "-zkhost=localhost:2181")
+	zkhost := flag.String("registryUri", "zk://localhost:2181", "-registryUri=zk://localhost:2181")
 	flag.Parse()
 
 	runtime.GOMAXPROCS(8)
@@ -148,7 +148,7 @@ func main() {
 						txmsg := buildBytesMessage(true)
 						err := kite.SendBytesMessage(txmsg)
 						if nil != err {
-							// fmt.Printf("SEND MESSAGE |FAIL|%s\n", err)
+							fmt.Printf("SEND MESSAGE |FAIL|%s\n", err)
 							atomic.AddInt32(&fc, 1)
 						} else {
 							atomic.AddInt32(&count, 1)
