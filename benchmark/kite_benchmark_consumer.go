@@ -48,7 +48,7 @@ func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
 
 func main() {
 	logxml := flag.String("logxml", "../log/log_consumer.xml", "-logxml=../log/log_consumer.xml")
-	zkhost := flag.String("registryUri", "zk://localhost:2181", "-registryUri=zk://localhost:2181")
+	zkhost := flag.String("registryUri", "etcd://http://localhost:2379", "-registryUri=etcd://http://localhost:2379")
 	flag.Parse()
 	runtime.GOMAXPROCS(8)
 

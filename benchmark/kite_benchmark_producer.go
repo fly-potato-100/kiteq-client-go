@@ -89,7 +89,7 @@ func main() {
 	k := flag.Int("k", 1, "-k=1  //kiteclient num ")
 	c := flag.Int("c", 1, "-c=100")
 	tx := flag.Bool("tx", false, "-tx=true send Tx Message")
-	zkhost := flag.String("registryUri", "zk://localhost:2181", "-registryUri=zk://localhost:2181")
+	zkhost := flag.String("registryUri", "etcd://http://localhost:2379", "-registryUri=etcd://http://localhost:2379")
 	flag.Parse()
 
 	runtime.GOMAXPROCS(8)
