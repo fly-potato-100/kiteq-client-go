@@ -1,4 +1,4 @@
-package listener
+package client
 
 import (
 	"github.com/blackbeans/kiteq-common/protocol"

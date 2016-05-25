@@ -1,16 +1,17 @@
-package core
+package client
 
 import (
-	"github.com/blackbeans/kiteq-common/protocol"
-	"github.com/blackbeans/kiteq-common/registry/bind"
-	"github.com/blackbeans/kiteq-common/store"
-
-	"github.com/blackbeans/turbo"
-	"github.com/golang/protobuf/proto"
-	"kiteq/server"
 	"log"
 	"testing"
 	"time"
+
+	"kiteq/server"
+
+	"github.com/blackbeans/kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/registry/bind"
+	"github.com/blackbeans/kiteq-common/store"
+	"github.com/blackbeans/turbo"
+	"github.com/golang/protobuf/proto"
 )
 
 func buildStringMessage(commit bool) *protocol.StringMessage {
@@ -47,20 +48,20 @@ func buildBytesMessage(commit bool) *protocol.BytesMessage {
 	return entity
 }
 
-type MockListener struct {
+type MockTestListener struct {
 	rc  chan string
 	txc chan string
 }
 
-func (self *MockListener) OnMessage(msg *protocol.QMessage) bool {
-	log.Println("MockListener|OnMessage", msg.GetHeader(), msg.GetBody())
+func (self *MockTestListener) OnMessage(msg *protocol.QMessage) bool {
+	log.Println("MockTestListener|OnMessage", msg.GetHeader(), msg.GetBody())
 	self.rc <- msg.GetHeader().GetMessageId()
 
 	return true
 }
 
-func (self *MockListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	log.Println("MockListener|OnMessageCheck", tx.MessageId)
+func (self *MockTestListener) OnMessageCheck(tx *protocol.TxResponse) error {
+	log.Println("MockTestListener|OnMessageCheck", tx.MessageId)
 	self.txc <- tx.MessageId
 	tx.Commit()
 	return nil
@@ -73,7 +74,7 @@ var manager *KiteClientManager
 
 func init() {
 
-	l := &MockListener{rc: rc, txc: txc}
+	l := &MockTestListener{rc: rc, txc: txc}
 
 	rc := turbo.NewRemotingConfig(
 		"remoting-127.0.0.1:13800",

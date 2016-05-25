@@ -1,5 +1,4 @@
-package handler
-
+package client
 import (
 	"github.com/blackbeans/kiteq-common/protocol"
 	log "github.com/blackbeans/log4go"

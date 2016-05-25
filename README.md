@@ -7,10 +7,6 @@ kiteq-client-go is kiteq's go client
     ├── log               log4go的配置
     ├── benchmark         KiteQ的Benchmark程序
     ├── client            KiteQ的客户端
-      ├── handler         KiteQClient所需要的处理Handler
-      ├── listener        消息接收器
-      ├── handler         KiteQClient所需要的处理Handler
-      └── core            KiteQ的存储结构
   
 ##### 启动客户端：
 ```

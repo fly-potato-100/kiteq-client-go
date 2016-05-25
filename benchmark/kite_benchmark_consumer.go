@@ -3,9 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/blackbeans/kiteq-common/protocol"
-	"github.com/blackbeans/kiteq-common/registry/bind"
-	log "github.com/blackbeans/log4go"
 	"kiteq-client-go/client"
 	"net/http"
 	_ "net/http/pprof"
@@ -16,6 +13,10 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/blackbeans/kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/registry/bind"
+	log "github.com/blackbeans/log4go"
 )
 
 type defualtListener struct {

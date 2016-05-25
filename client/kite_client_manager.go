@@ -1,9 +1,14 @@
-package core
+package client
 
 import (
 	"errors"
-	"github.com/blackbeans/kiteq-client-go/client/handler"
-	"github.com/blackbeans/kiteq-client-go/client/listener"
+
+	"math/rand"
+	"net"
+	"os"
+	"sync"
+	"time"
+
 	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/registry"
 	"github.com/blackbeans/kiteq-common/registry/bind"
@@ -12,11 +17,6 @@ import (
 	"github.com/blackbeans/turbo"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/pipe"
-	"math/rand"
-	"net"
-	"os"
-	"sync"
-	"time"
 )
 
 const (
@@ -42,7 +42,7 @@ type KiteClientManager struct {
 	flowstat       *stat.FlowStat
 }
 
-func NewKiteClientManager(registryUri, groupId, secretKey string, listen listener.IListener) *KiteClientManager {
+func NewKiteClientManager(registryUri, groupId, secretKey string, listen IListener) *KiteClientManager {
 
 	flowstat := stat.NewFlowStat("kiteclient-" + groupId)
 	rc := turbo.NewRemotingConfig(
@@ -57,9 +57,9 @@ func NewKiteClientManager(registryUri, groupId, secretKey string, listen listene
 	//构造pipeline的结构
 	pipeline := pipe.NewDefaultPipeline()
 	clientm := c.NewClientManager(reconnManager)
-	pipeline.RegisteHandler("kiteclient-packet", handler.NewPacketHandler("kiteclient-packet"))
-	pipeline.RegisteHandler("kiteclient-heartbeat", handler.NewHeartbeatHandler("kiteclient-heartbeat", 10*time.Second, 5*time.Second, clientm))
-	pipeline.RegisteHandler("kiteclient-accept", handler.NewAcceptHandler("kiteclient-accept", listen))
+	pipeline.RegisteHandler("kiteclient-packet", NewPacketHandler("kiteclient-packet"))
+	pipeline.RegisteHandler("kiteclient-heartbeat", NewHeartbeatHandler("kiteclient-heartbeat", 10*time.Second, 5*time.Second, clientm))
+	pipeline.RegisteHandler("kiteclient-accept", NewAcceptHandler("kiteclient-accept", listen))
 	pipeline.RegisteHandler("kiteclient-remoting", pipe.NewRemotingHandler("kiteclient-remoting", clientm))
 
 	registryCenter := registry.NewRegistryCenter(registryUri)

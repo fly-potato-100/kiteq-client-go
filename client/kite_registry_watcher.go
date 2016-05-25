@@ -1,6 +1,8 @@
-package core
+package client
 
 import (
+	"strings"
+
 	"github.com/blackbeans/kiteq-common/registry"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
@@ -8,7 +10,6 @@ import (
 	"github.com/blackbeans/turbo/codec"
 	"github.com/blackbeans/turbo/packet"
 	"github.com/blackbeans/turbo/pipe"
-	"strings"
 )
 
 func (self *KiteClientManager) NodeChange(path string, eventType registry.RegistryEvent, children []string) {

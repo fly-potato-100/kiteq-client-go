@@ -1,10 +1,10 @@
-package handler
+package client
 
 import (
 	"errors"
+
 	"github.com/blackbeans/kiteq-common/protocol"
 	. "github.com/blackbeans/turbo/pipe"
-
 	// 	log "github.com/blackbeans/log4go"
 )
 

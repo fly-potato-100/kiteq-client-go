@@ -1,23 +1,21 @@
 package client
 
 import (
-	"github.com/blackbeans/kiteq-client-go/client/core"
-	"github.com/blackbeans/kiteq-client-go/client/listener"
 	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 )
 
 type KiteQClient struct {
-	kclientManager *core.KiteClientManager
+	kclientManager *KiteClientManager
 }
 
 func (self *KiteQClient) Start() {
 	self.kclientManager.Start()
 }
 
-func NewKiteQClient(zkAddr, groupId, secretKey string, listener listener.IListener) *KiteQClient {
+func NewKiteQClient(zkAddr, groupId, secretKey string, listener IListener) *KiteQClient {
 	return &KiteQClient{
-		kclientManager: core.NewKiteClientManager(zkAddr, groupId, secretKey, listener)}
+		kclientManager: NewKiteClientManager(zkAddr, groupId, secretKey, listener)}
 }
 
 func (self *KiteQClient) SetTopics(topics []string) {
@@ -29,12 +27,12 @@ func (self *KiteQClient) SetBindings(bindings []*bind.Binding) {
 
 }
 
-func (self *KiteQClient) SendTxStringMessage(msg *protocol.StringMessage, transcation core.DoTranscation) error {
+func (self *KiteQClient) SendTxStringMessage(msg *protocol.StringMessage, transcation DoTranscation) error {
 	message := protocol.NewQMessage(msg)
 	return self.kclientManager.SendTxMessage(message, transcation)
 }
 
-func (self *KiteQClient) SendTxBytesMessage(msg *protocol.BytesMessage, transcation core.DoTranscation) error {
+func (self *KiteQClient) SendTxBytesMessage(msg *protocol.BytesMessage, transcation DoTranscation) error {
 	message := protocol.NewQMessage(msg)
 	return self.kclientManager.SendTxMessage(message, transcation)
 }

@@ -1,9 +1,9 @@
-package handler
+package client
 
 import (
 	"errors"
 	"fmt"
-	"github.com/blackbeans/kiteq-client-go/client/listener"
+
 	"github.com/blackbeans/kiteq-common/protocol"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/packet"
@@ -30,10 +30,10 @@ func newAcceptEvent(msgType uint8, msg interface{}, remoteClient *c.RemotingClie
 //--------------------如下为具体的处理Handler
 type AcceptHandler struct {
 	BaseForwardHandler
-	listener listener.IListener
+	listener IListener
 }
 
-func NewAcceptHandler(name string, listener listener.IListener) *AcceptHandler {
+func NewAcceptHandler(name string, listener IListener) *AcceptHandler {
 	ahandler := &AcceptHandler{}
 	ahandler.BaseForwardHandler = NewBaseForwardHandler(name, ahandler)
 	ahandler.listener = listener
