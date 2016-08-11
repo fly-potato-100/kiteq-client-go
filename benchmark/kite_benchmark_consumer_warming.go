@@ -36,7 +36,7 @@ func (self *defualtListener) monitor() {
 }
 
 func (self *defualtListener) OnMessage(msg *protocol.QMessage) bool {
-//	log.Info("defualtListener|OnMessage|%s", msg.GetHeader().GetMessageId())
+	//	log.Info("defualtListener|OnMessage|%s", msg.GetHeader().GetMessageId())
 	atomic.AddInt32(&self.count, 1)
 	return true
 }
@@ -50,6 +50,7 @@ func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
 func main() {
 	logxml := flag.String("logxml", "../log/log_consumer.xml", "-logxml=../log/log_consumer.xml")
 	zkhost := flag.String("registryUri", "etcd://http://localhost:2379", "-registryUri=etcd://http://localhost:2379")
+	warmingUp := flag.Int("warmingUp", 10, "-warmingUp=10")
 	flag.Parse()
 	runtime.GOMAXPROCS(8)
 
@@ -62,9 +63,9 @@ func main() {
 	lis := &defualtListener{}
 	go lis.monitor()
 
-	kite := client.NewKiteQClient(*zkhost, "s-mts-test1", "123456", lis)
+	kite := client.NewKiteQClientWithWarmup(*zkhost, "s-mts-test", "123456", *warmingUp, lis)
 	kite.SetBindings([]*bind.Binding{
-		bind.Bind_Direct("s-mts-test1", "trade", "pay-succ", 8000, true),
+		bind.Bind_Direct("s-mts-test", "trade", "pay-succ", 8000, true),
 	})
 	kite.Start()
 

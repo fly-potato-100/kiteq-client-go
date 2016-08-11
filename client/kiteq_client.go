@@ -14,8 +14,12 @@ func (self *KiteQClient) Start() {
 }
 
 func NewKiteQClient(zkAddr, groupId, secretKey string, listener IListener) *KiteQClient {
+	return NewKiteQClientWithWarmup(zkAddr, groupId, secretKey, 0, listener)
+}
+
+func NewKiteQClientWithWarmup(zkAddr, groupId, secretKey string, warmingupSec int, listener IListener) *KiteQClient {
 	return &KiteQClient{
-		kclientManager: NewKiteClientManager(zkAddr, groupId, secretKey, listener)}
+		kclientManager: NewKiteClientManager(zkAddr, groupId, secretKey, warmingupSec, listener)}
 }
 
 func (self *KiteQClient) SetTopics(topics []string) {

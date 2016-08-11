@@ -13,7 +13,7 @@ import (
 func handshake(ga *c.GroupAuth, remoteClient *c.RemotingClient) (bool, error) {
 
 	for i := 0; i < 3; i++ {
-		p := protocol.MarshalConnMeta(ga.GroupId, ga.SecretKey)
+		p := protocol.MarshalConnMeta(ga.GroupId, ga.SecretKey, int32(ga.WarmingupSec))
 		rpacket := packet.NewPacket(protocol.CMD_CONN_META, p)
 		resp, err := remoteClient.WriteAndGet(*rpacket, 5*time.Second)
 		if nil != err {

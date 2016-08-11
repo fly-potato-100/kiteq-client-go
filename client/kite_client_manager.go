@@ -42,7 +42,7 @@ type KiteClientManager struct {
 	flowstat       *stat.FlowStat
 }
 
-func NewKiteClientManager(registryUri, groupId, secretKey string, listen IListener) *KiteClientManager {
+func NewKiteClientManager(registryUri, groupId, secretKey string, warmingupSec int, listen IListener) *KiteClientManager {
 
 	flowstat := stat.NewFlowStat("kiteclient-" + groupId)
 	rc := turbo.NewRemotingConfig(
@@ -63,8 +63,10 @@ func NewKiteClientManager(registryUri, groupId, secretKey string, listen IListen
 	pipeline.RegisteHandler("kiteclient-remoting", pipe.NewRemotingHandler("kiteclient-remoting", clientm))
 
 	registryCenter := registry.NewRegistryCenter(registryUri)
+	ga := c.NewGroupAuth(groupId, secretKey)
+	ga.WarmingupSec = warmingupSec
 	manager := &KiteClientManager{
-		ga:             c.NewGroupAuth(groupId, secretKey),
+		ga:             ga,
 		kiteClients:    make(map[string][]*kiteClient, 10),
 		topics:         make([]string, 0, 10),
 		pipeline:       pipeline,
