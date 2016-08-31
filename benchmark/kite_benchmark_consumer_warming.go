@@ -65,7 +65,7 @@ func main() {
 
 	kite := client.NewKiteQClientWithWarmup(*zkhost, "s-mts-test", "123456", *warmingUp, lis)
 	kite.SetBindings([]*bind.Binding{
-		bind.Bind_Direct("s-mts-test", "trade", "pay-succ", 8000, true),
+		bind.Bind_Direct("s-mts-test", "trade", "pay-succ", 8000, false),
 	})
 	kite.Start()
 
