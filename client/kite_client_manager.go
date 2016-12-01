@@ -44,7 +44,7 @@ type KiteClientManager struct {
 
 func NewKiteClientManager(registryUri, groupId, secretKey string, warmingupSec int, listen IListener) *KiteClientManager {
 
-	flowstat := stat.NewFlowStat("kiteclient-" + groupId)
+	flowstat := stat.NewFlowStat()
 	rc := turbo.NewRemotingConfig(
 		"remoting-"+groupId,
 		50, 16*1024,
