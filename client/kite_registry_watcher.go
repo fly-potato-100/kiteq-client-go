@@ -25,6 +25,7 @@ func (self *KiteClientManager) NodeChange(path string, eventType registry.Regist
 		}
 		//获取topic
 		topic := split[3]
+		log.WarnLog("kite_client", "KiteClientManager|ChildWatcher|Change|%s|%v|%+v", path, children, eventType)
 		//search topic
 		for _, t := range self.topics {
 			if t == topic {
@@ -37,7 +38,8 @@ func (self *KiteClientManager) NodeChange(path string, eventType registry.Regist
 
 //当触发QServer地址发生变更
 func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
-
+	self.lock.Lock()
+	defer self.lock.Unlock()
 	//重建一下topic下的kiteclient
 	clients := make([]*kiteClient, 0, 10)
 	for _, host := range hosts {
@@ -79,8 +81,6 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 
 	log.InfoLog("kite_client", "KiteClientManager|onQServerChanged|SUCC|%s|%s\n", topic, hosts)
 
-	self.lock.Lock()
-	defer self.lock.Unlock()
 	//替换掉线的server
 	old, ok := self.kiteClients[topic]
 	self.kiteClients[topic] = clients
@@ -88,9 +88,12 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 		del := make([]string, 0, 2)
 	outter:
 		for _, o := range old {
-			for _, c := range clients {
-				if c.remotec.RemoteAddr() == o.remotec.RemoteAddr() {
-					continue outter
+			//决定删除的时候必须把所有的当前对应的client遍历一遍不然会删除掉
+			for _, clients := range self.kiteClients {
+				for _, c := range clients {
+					if c.remotec.RemoteAddr() == o.remotec.RemoteAddr() {
+						continue outter
+					}
 				}
 			}
 			del = append(del, o.remotec.RemoteAddr())
