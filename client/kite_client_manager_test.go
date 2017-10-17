@@ -5,12 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"kiteq/server"
-
 	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	"github.com/blackbeans/kiteq-common/store"
-	"github.com/blackbeans/turbo"
 	"github.com/golang/protobuf/proto"
 )
 
@@ -18,6 +15,7 @@ func buildStringMessage(commit bool) *protocol.StringMessage {
 	//创建消息
 	entity := &protocol.StringMessage{}
 	entity.Header = &protocol.Header{
+		Snappy:       proto.Bool(true),
 		MessageId:    proto.String(store.MessageId()),
 		Topic:        proto.String("uneed-test"),
 		MessageType:  proto.String("pay-succ"),
@@ -35,6 +33,7 @@ func buildBytesMessage(commit bool) *protocol.BytesMessage {
 	//创建消息
 	entity := &protocol.BytesMessage{}
 	entity.Header = &protocol.Header{
+		Snappy:       proto.Bool(true),
 		MessageId:    proto.String(store.MessageId()),
 		Topic:        proto.String("uneed-test"),
 		MessageType:  proto.String("pay-succ"),
@@ -54,7 +53,7 @@ type MockTestListener struct {
 }
 
 func (self *MockTestListener) OnMessage(msg *protocol.QMessage) bool {
-	log.Println("MockTestListener|OnMessage", msg.GetHeader(), msg.GetBody())
+	log.Printf("MockTestListener|OnMessage|%+v|%s\n", msg.GetHeader(), msg.GetBody())
 	self.rc <- msg.GetHeader().GetMessageId()
 
 	return true
@@ -69,24 +68,14 @@ func (self *MockTestListener) OnMessageCheck(tx *protocol.TxResponse) error {
 
 var rc = make(chan string, 1)
 var txc = make(chan string, 1)
-var kiteQ *server.KiteQServer
 var manager *KiteClientManager
 
 func init() {
 
 	l := &MockTestListener{rc: rc, txc: txc}
 
-	rc := turbo.NewRemotingConfig(
-		"remoting-127.0.0.1:13800",
-		2000, 16*1024,
-		16*1024, 10000, 10000,
-		10*time.Second, 160000)
-
-	kc := server.NewKiteQConfig(server.MockServerOption(), rc)
-	kiteQ = server.NewKiteQServer(kc)
-
 	// 创建客户端
-	manager = NewKiteClientManager("zk://10.0.1.92:2181", "ps-trade-a", "123456", l)
+	manager = NewKiteClientManager("zk://10.0.1.92:2181", "ps-trade-a", "123456", 5, l)
 	manager.SetPublishTopics([]string{"uneed-test"})
 
 	// 设置接收类型
@@ -96,7 +85,6 @@ func init() {
 		},
 	)
 
-	kiteQ.Start()
 	time.Sleep(10 * time.Second)
 	manager.Start()
 }
@@ -114,12 +102,9 @@ func TestStringMesage(t *testing.T) {
 
 	select {
 	case mid := <-rc:
-		if mid != m.GetHeader().GetMessageId() {
-			t.Fail()
-		}
-		log.Println("RECIEVE StringMESSAGE |SUCCESS")
+		t.Logf("RECIEVE StringMESSAGE |SUCCESS|%s\n", mid)
 	case <-time.After(10 * time.Second):
-		log.Println("WAIT StringMESSAGE |TIMEOUT|", err)
+		t.Logf("WAIT StringMESSAGE |TIMEOUT|%v\n", err)
 		t.Fail()
 
 	}
