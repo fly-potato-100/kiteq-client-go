@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"time"
@@ -53,14 +54,14 @@ type MockTestListener struct {
 }
 
 func (self *MockTestListener) OnMessage(msg *protocol.QMessage) bool {
-	log.Printf("MockTestListener|OnMessage|%+v|%s\n", msg.GetHeader(), msg.GetBody())
+	fmt.Printf("MockTestListener|OnMessage|%+v|%s\n", msg.GetHeader(), msg.GetBody())
 	self.rc <- msg.GetHeader().GetMessageId()
 
 	return true
 }
 
 func (self *MockTestListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	log.Println("MockTestListener|OnMessageCheck", tx.MessageId)
+	fmt.Printf("MockTestListener|OnMessageCheck|%s\n", tx.MessageId)
 	self.txc <- tx.MessageId
 	tx.Commit()
 	return nil
@@ -153,10 +154,7 @@ func TestTxBytesMessage(t *testing.T) {
 
 	select {
 	case mid := <-rc:
-		if mid != bm.GetHeader().GetMessageId() {
-			t.Fail()
-		}
-		log.Println("RECIEVE TxBytesMESSAGE |SUCCESS")
+		log.Println("RECIEVE TxBytesMESSAGE |SUCCESS", mid)
 	case txid := <-txc:
 		if txid != bm.GetHeader().GetMessageId() {
 			t.Fail()
