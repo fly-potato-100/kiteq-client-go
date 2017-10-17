@@ -3,6 +3,7 @@ package client
 import (
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"github.com/blackbeans/kiteq-common/protocol"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/packet"
@@ -38,6 +39,19 @@ func (self *kiteClient) sendMessage(message *protocol.QMessage) error {
 	if message.GetHeader().GetCreateTime() <= 0 {
 		message.GetHeader().CreateTime = protocol.MarshalInt64(time.Now().Unix())
 	}
+
+	//snappy
+	if message.GetHeader().GetSnappy() {
+		switch message.GetMsgType() {
+		case protocol.CMD_BYTES_MESSAGE:
+			bytesMessage := message.GetPbMessage().(*protocol.BytesMessage)
+			bytesMessage.Body = 
+
+		case protocol.CMD_STRING_MESSAGE:
+			stringMessage := message.GetPbMessage().(*protocol.StringMessage)
+		}
+	}
+
 	data, err := protocol.MarshalPbMessage(message.GetPbMessage())
 	if nil != err {
 		return err
