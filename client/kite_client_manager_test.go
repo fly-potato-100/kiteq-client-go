@@ -19,7 +19,7 @@ func buildStringMessage(commit bool) *protocol.StringMessage {
 	entity := &protocol.StringMessage{}
 	entity.Header = &protocol.Header{
 		MessageId:    proto.String(store.MessageId()),
-		Topic:        proto.String("trade"),
+		Topic:        proto.String("uneed-test"),
 		MessageType:  proto.String("pay-succ"),
 		ExpiredTime:  proto.Int64(time.Now().Add(10 * time.Minute).Unix()),
 		DeliverLimit: proto.Int32(-1),
@@ -36,7 +36,7 @@ func buildBytesMessage(commit bool) *protocol.BytesMessage {
 	entity := &protocol.BytesMessage{}
 	entity.Header = &protocol.Header{
 		MessageId:    proto.String(store.MessageId()),
-		Topic:        proto.String("trade"),
+		Topic:        proto.String("uneed-test"),
 		MessageType:  proto.String("pay-succ"),
 		ExpiredTime:  proto.Int64(time.Now().Add(10 * time.Minute).Unix()),
 		DeliverLimit: proto.Int32(-1),
@@ -87,12 +87,12 @@ func init() {
 
 	// 创建客户端
 	manager = NewKiteClientManager("zk://10.0.1.92:2181", "ps-trade-a", "123456", l)
-	manager.SetPublishTopics([]string{"trade"})
+	manager.SetPublishTopics([]string{"uneed-test"})
 
 	// 设置接收类型
 	manager.SetBindings(
 		[]*bind.Binding{
-			bind.Bind_Direct("ps-trade-a", "trade", "pay-succ", 1000, true),
+			bind.Bind_Direct("ps-trade-a", "uneed-test", "pay-succ", 1000, true),
 		},
 	)
 
