@@ -86,7 +86,7 @@ func init() {
 	kiteQ = server.NewKiteQServer(kc)
 
 	// 创建客户端
-	manager = NewKiteClientManager("zk://localhost:2181", "ps-trade-a", "123456", l)
+	manager = NewKiteClientManager("zk://10.0.1.92:2181", "ps-trade-a", "123456", l)
 	manager.SetPublishTopics([]string{"trade"})
 
 	// 设置接收类型

@@ -1,18 +1,19 @@
 package client
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 
 	"github.com/blackbeans/kiteq-common/protocol"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/packet"
-	. "github.com/blackbeans/turbo/pipe"
+	"github.com/blackbeans/turbo/pipe"
 )
 
 //接受消息事件
 type acceptEvent struct {
-	IForwardEvent
+	pipe.IForwardEvent
 	msgType      uint8
 	msg          interface{} //attach的数据message
 	remoteClient *c.RemotingClient
@@ -29,23 +30,23 @@ func newAcceptEvent(msgType uint8, msg interface{}, remoteClient *c.RemotingClie
 
 //--------------------如下为具体的处理Handler
 type AcceptHandler struct {
-	BaseForwardHandler
+	pipe.BaseForwardHandler
 	listener IListener
 }
 
 func NewAcceptHandler(name string, listener IListener) *AcceptHandler {
 	ahandler := &AcceptHandler{}
-	ahandler.BaseForwardHandler = NewBaseForwardHandler(name, ahandler)
+	ahandler.BaseForwardHandler = pipe.NewBaseForwardHandler(name, ahandler)
 	ahandler.listener = listener
 	return ahandler
 }
 
-func (self *AcceptHandler) TypeAssert(event IEvent) bool {
+func (self *AcceptHandler) TypeAssert(event pipe.IEvent) bool {
 	_, ok := self.cast(event)
 	return ok
 }
 
-func (self *AcceptHandler) cast(event IEvent) (val *acceptEvent, ok bool) {
+func (self *AcceptHandler) cast(event pipe.IEvent) (val *acceptEvent, ok bool) {
 	val, ok = event.(*acceptEvent)
 
 	return
@@ -53,12 +54,12 @@ func (self *AcceptHandler) cast(event IEvent) (val *acceptEvent, ok bool) {
 
 var INVALID_MSG_TYPE_ERROR = errors.New("INVALID MSG TYPE !")
 
-func (self *AcceptHandler) Process(ctx *DefaultPipelineContext, event IEvent) error {
+func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.IEvent) error {
 	// log.DebugLog("kite_client_handler","AcceptHandler|Process|%s|%t\n", self.GetName(), event)
 
 	acceptEvent, ok := self.cast(event)
 	if !ok {
-		return ERROR_INVALID_EVENT_TYPE
+		return pipe.ERROR_INVALID_EVENT_TYPE
 	}
 
 	switch acceptEvent.msgType {
@@ -82,7 +83,7 @@ func (self *AcceptHandler) Process(ctx *DefaultPipelineContext, event IEvent) er
 		txResp := packet.NewRespPacket(acceptEvent.opaque, acceptEvent.msgType, txData)
 
 		//发送提交结果确认的Packet
-		remotingEvent := NewRemotingEvent(txResp, []string{acceptEvent.remoteClient.RemoteAddr()})
+		remotingEvent := pipe.NewRemotingEvent(txResp, []string{acceptEvent.remoteClient.RemoteAddr()})
 		ctx.SendForward(remotingEvent)
 		// log.DebugLog("kite_client_handler","AcceptHandler|Recieve TXMessage|%t\n", acceptEvent.Msg)
 
@@ -91,6 +92,29 @@ func (self *AcceptHandler) Process(ctx *DefaultPipelineContext, event IEvent) er
 		//log.DebugLog("kite_client_handler","AcceptHandler|Recieve Message|%t\n", acceptEvent.Msg)
 
 		message := protocol.NewQMessage(acceptEvent.msg)
+
+		//或者解压
+		if message.GetHeader().GetSnappy() {
+			switch message.GetMsgType() {
+			case protocol.CMD_BYTES_MESSAGE:
+				data, err := Decompress(message.GetBody().([]byte))
+				if nil != err {
+					return err
+				}
+				message.Body = data
+			case protocol.CMD_STRING_MESSAGE:
+				data, err := base64.StdEncoding.DecodeString(message.GetBody().(string))
+				if nil != err {
+					return fmt.Errorf("DecodeString Base64 String Fail %v", err)
+				}
+				data, err = Decompress(data)
+				if nil != err {
+					return err
+				}
+				message.Body = string(data)
+			}
+		}
+
 		var err error
 		succ := false
 		func() {
@@ -106,7 +130,7 @@ func (self *AcceptHandler) Process(ctx *DefaultPipelineContext, event IEvent) er
 
 		respPacket := packet.NewRespPacket(acceptEvent.opaque, protocol.CMD_DELIVER_ACK, dpacket)
 
-		remotingEvent := NewRemotingEvent(respPacket, []string{acceptEvent.remoteClient.RemoteAddr()})
+		remotingEvent := pipe.NewRemotingEvent(respPacket, []string{acceptEvent.remoteClient.RemoteAddr()})
 
 		ctx.SendForward(remotingEvent)
 

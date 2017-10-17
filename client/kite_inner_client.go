@@ -1,13 +1,16 @@
 package client
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/golang/protobuf/proto"
+
 	"github.com/blackbeans/kiteq-common/protocol"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/packet"
-	// 	log "github.com/blackbeans/log4go"
-	"time"
 )
 
 type kiteClient struct {
@@ -38,6 +41,31 @@ func (self *kiteClient) sendMessage(message *protocol.QMessage) error {
 	if message.GetHeader().GetCreateTime() <= 0 {
 		message.GetHeader().CreateTime = protocol.MarshalInt64(time.Now().Unix())
 	}
+
+	//snappy
+	if message.GetHeader().GetSnappy() {
+
+		switch message.GetMsgType() {
+		case protocol.CMD_BYTES_MESSAGE:
+			compress, err := Compress(message.GetBody().([]byte))
+			if nil != err {
+				return err
+			}
+			bytesMessage := message.GetPbMessage().(*protocol.BytesMessage)
+			bytesMessage.Body = compress
+			message = protocol.NewQMessage(bytesMessage)
+
+		case protocol.CMD_STRING_MESSAGE:
+			compress, err := Compress([]byte(message.GetBody().(string)))
+			if nil != err {
+				return err
+			}
+			stringMessage := message.GetPbMessage().(*protocol.StringMessage)
+			stringMessage.Body = proto.String(base64.StdEncoding.EncodeToString(compress))
+			message = protocol.NewQMessage(stringMessage)
+		}
+	}
+
 	data, err := protocol.MarshalPbMessage(message.GetPbMessage())
 	if nil != err {
 		return err
