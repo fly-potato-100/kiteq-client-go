@@ -99,7 +99,8 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 			case protocol.CMD_BYTES_MESSAGE:
 				data, err := Decompress(message.GetBody().([]byte))
 				if nil != err {
-					return err
+					//如果解压失败那么采用不解压
+					data = message.GetBody().([]byte)
 				}
 				message.Body = data
 			case protocol.CMD_STRING_MESSAGE:
@@ -109,7 +110,8 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 				}
 				data, err = Decompress(data)
 				if nil != err {
-					return err
+					//如果解压失败那么采用不解压
+					data = message.GetBody().([]byte)
 				}
 				message.Body = string(data)
 			}
