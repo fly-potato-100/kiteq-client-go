@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/blackbeans/log4go"
+
 	"github.com/blackbeans/kiteq-common/protocol"
 	c "github.com/blackbeans/turbo/client"
 	"github.com/blackbeans/turbo/packet"
@@ -97,8 +99,10 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 		if message.GetHeader().GetSnappy() {
 			switch message.GetMsgType() {
 			case protocol.CMD_BYTES_MESSAGE:
+
 				data, err := Decompress(message.GetBody().([]byte))
 				if nil != err {
+					log4go.ErrorLog("kite_client", "AcceptHandler|CMD_BYTES_MESSAGE|Body Decompress|FAIL|%s|%s", err, string(message.GetBody().([]byte)))
 					//如果解压失败那么采用不解压
 					data = message.GetBody().([]byte)
 				}
@@ -110,6 +114,7 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 				}
 				data, err = Decompress(data)
 				if nil != err {
+					log4go.ErrorLog("kite_client", "AcceptHandler|CMD_STRING_MESSAGE|Body Decompress|FAIL|%s|%s", err, string(message.GetBody().([]byte)))
 					//如果解压失败那么采用不解压
 					data = message.GetBody().([]byte)
 				}
@@ -122,7 +127,7 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					err = errors.New(fmt.Sprintf("%s", r))
+					err = fmt.Errorf("%s", r)
 				}
 			}()
 			succ = self.listener.OnMessage(message)
