@@ -9,7 +9,7 @@ import (
 	log "github.com/blackbeans/log4go"
 	"github.com/golang/protobuf/proto"
 	"io"
-	client "kiteq-client-go"
+	"kiteq-client-go/client"
 	"net/http"
 	_ "net/http/pprof"
 	"os"

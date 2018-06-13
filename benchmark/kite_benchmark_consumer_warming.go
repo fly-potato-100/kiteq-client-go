@@ -14,7 +14,7 @@ import (
 
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
-	"github.com/blackbeans/kiteq-client-go/client"
+	"kiteq-client-go/client"
 	"kiteq-client-go/benchmark/listener"
 )
 

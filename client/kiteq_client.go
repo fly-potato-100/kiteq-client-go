@@ -1,4 +1,4 @@
-package kiteq_client_go
+package client
 
 import (
 	"github.com/blackbeans/kiteq-common/protocol"

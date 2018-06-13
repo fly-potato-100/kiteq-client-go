@@ -1,4 +1,4 @@
-package kiteq_client_go
+package client
 
 //snappy解压缩
 import "github.com/golang/snappy"
