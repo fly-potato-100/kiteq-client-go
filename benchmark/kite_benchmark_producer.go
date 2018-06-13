@@ -20,21 +20,9 @@ import (
 	"sync/atomic"
 	"syscall"
 	"time"
+	"kiteq-client-go/benchmark/listener"
 )
 
-type defualtListener struct {
-}
-
-func (self *defualtListener) OnMessage(msg *protocol.QMessage) bool {
-	log.Info("defaultListener|OnMessage", msg.GetHeader(), msg.GetBody())
-	return true
-}
-
-func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	// log.Info("defaultListener|OnMessageCheck", messageId)
-	tx.Commit()
-	return nil
-}
 
 var body []byte
 var rander = rand.Reader // random function
@@ -51,7 +39,7 @@ func buildBytesMessage(commit bool) *protocol.BytesMessage {
 	entity := &protocol.BytesMessage{}
 	entity.Header = &protocol.Header{
 		MessageId:    proto.String(store.MessageId()),
-		Topic:        proto.String("trade"),
+		Topic:        proto.String("profile"),
 		MessageType:  proto.String("pay-succ"),
 		ExpiredTime:  proto.Int64(time.Now().Add(24 * time.Hour).Unix()),
 		DeliverLimit: proto.Int32(100),
@@ -70,7 +58,7 @@ func buildStringMessage(commit bool) *protocol.StringMessage {
 	entity := &protocol.StringMessage{}
 	entity.Header = &protocol.Header{
 		MessageId:    proto.String(store.MessageId()),
-		Topic:        proto.String("trade"),
+		Topic:        proto.String("profile"),
 		MessageType:  proto.String("pay-succ"),
 		ExpiredTime:  proto.Int64(-1),
 		DeliverLimit: proto.Int32(100),
@@ -125,8 +113,8 @@ func main() {
 	clients := make([]*client.KiteQClient, 0, *k)
 	for j := 0; j < *k; j++ {
 
-		kiteClient := client.NewKiteQClient(*zkhost, "go-kite-test", "123456", &defualtListener{})
-		kiteClient.SetTopics([]string{"trade"})
+		kiteClient := client.NewKiteQClient(*zkhost, "go-kite-test", "123456", &listener.DefaultListener{})
+		kiteClient.SetTopics([]string{"profile"})
 		kiteClient.Start()
 		clients = append(clients, kiteClient)
 		time.Sleep(3 * time.Second)

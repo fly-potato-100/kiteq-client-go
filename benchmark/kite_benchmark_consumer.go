@@ -9,45 +9,16 @@ import (
 	"os/signal"
 	"runtime"
 	"runtime/debug"
-	"sync/atomic"
 	"syscall"
 	"time"
 
-	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
-	"github.com/blackbeans/kiteq-client-go/client"
+	client "kiteq-client-go"
+	"kiteq-client-go/benchmark/listener"
 )
 
-type defaultListener struct {
-	count int32
-	lc    int32
-}
 
-func (self *defaultListener) monitor() {
-	for {
-		tmp := self.count
-		ftmp := self.lc
-
-		time.Sleep(1 * time.Second)
-		fmt.Printf("tps:%d\n", (tmp - ftmp))
-		self.lc = tmp
-	}
-}
-
-
-
-func (self *defaultListener) OnMessage(msg *protocol.QMessage) bool {
-//	log.Info("defaultListener|OnMessage|%s", msg.GetHeader().GetMessageId())
-	atomic.AddInt32(&self.count, 1)
-	return true
-}
-
-func (self *defaultListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	log.Info("defaultListener|OnMessageCheck", tx.MessageId)
-	tx.Commit()
-	return nil
-}
 
 func main() {
 	logxml := flag.String("logxml", "../log/log_consumer.xml", "-logxml=../log/log_consumer.xml")
@@ -61,12 +32,12 @@ func main() {
 		log.Info(http.ListenAndServe(":38000", nil))
 	}()
 
-	lis := &defaultListener{}
-	go lis.monitor()
+	lis := &listener.DefaultListener{}
+	go lis.Monitor()
 
 	kite := client.NewKiteQClient(*zkhost, "s-mts-test1", "123456", lis)
 	kite.SetBindings([]*bind.Binding{
-		bind.Bind_Direct("s-mts-test1", "trade", "pay-succ", 8000, true),
+		bind.Bind_Direct("s-mts-test1", "profile", "pay-succ", 8000, true),
 	})
 	kite.Start()
 

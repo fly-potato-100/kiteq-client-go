@@ -15,6 +15,7 @@ import (
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
 	"github.com/blackbeans/kiteq-client-go/client"
+	"kiteq-client-go/benchmark/listener"
 )
 
 func main() {
@@ -30,12 +31,12 @@ func main() {
 		log.Info(http.ListenAndServe(":38000", nil))
 	}()
 
-	lis := &defaultListener{}
-	go lis.monitor()
+	lis := &listener.DefaultListener{}
+	go lis.Monitor()
 
 	kite := client.NewKiteQClientWithWarmup(*zkhost, "s-mts-test", "123456", *warmingUp, lis)
 	kite.SetBindings([]*bind.Binding{
-		bind.Bind_Direct("s-mts-test", "trade", "pay-succ", 8000, false),
+		bind.Bind_Direct("s-mts-test", "profile", "pay-succ", 8000, false),
 	})
 	kite.Start()
 

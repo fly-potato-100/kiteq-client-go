@@ -8,21 +8,19 @@ import (
 	"github.com/blackbeans/log4go"
 
 	"github.com/blackbeans/kiteq-common/protocol"
-	c "github.com/blackbeans/turbo/client"
-	"github.com/blackbeans/turbo/packet"
-	"github.com/blackbeans/turbo/pipe"
+	"github.com/blackbeans/turbo"
 )
 
 //接受消息事件
 type acceptEvent struct {
-	pipe.IForwardEvent
+	turbo.IForwardEvent
 	msgType      uint8
 	msg          interface{} //attach的数据message
-	remoteClient *c.RemotingClient
+	remoteClient *turbo.TClient
 	opaque       int32
 }
 
-func newAcceptEvent(msgType uint8, msg interface{}, remoteClient *c.RemotingClient, opaque int32) *acceptEvent {
+func newAcceptEvent(msgType uint8, msg interface{}, remoteClient *turbo.TClient, opaque int32) *acceptEvent {
 	return &acceptEvent{
 		msgType:      msgType,
 		msg:          msg,
@@ -32,23 +30,23 @@ func newAcceptEvent(msgType uint8, msg interface{}, remoteClient *c.RemotingClie
 
 //--------------------如下为具体的处理Handler
 type AcceptHandler struct {
-	pipe.BaseForwardHandler
+	turbo.BaseForwardHandler
 	listener IListener
 }
 
 func NewAcceptHandler(name string, listener IListener) *AcceptHandler {
 	ahandler := &AcceptHandler{}
-	ahandler.BaseForwardHandler = pipe.NewBaseForwardHandler(name, ahandler)
+	ahandler.BaseForwardHandler = turbo.NewBaseForwardHandler(name, ahandler)
 	ahandler.listener = listener
 	return ahandler
 }
 
-func (self *AcceptHandler) TypeAssert(event pipe.IEvent) bool {
+func (self *AcceptHandler) TypeAssert(event turbo.IEvent) bool {
 	_, ok := self.cast(event)
 	return ok
 }
 
-func (self *AcceptHandler) cast(event pipe.IEvent) (val *acceptEvent, ok bool) {
+func (self *AcceptHandler) cast(event turbo.IEvent) (val *acceptEvent, ok bool) {
 	val, ok = event.(*acceptEvent)
 
 	return
@@ -56,12 +54,12 @@ func (self *AcceptHandler) cast(event pipe.IEvent) (val *acceptEvent, ok bool) {
 
 var INVALID_MSG_TYPE_ERROR = errors.New("INVALID MSG TYPE !")
 
-func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.IEvent) error {
+func (self *AcceptHandler) Process(ctx *turbo.DefaultPipelineContext, event turbo.IEvent) error {
 	// log.DebugLog("kite_client_handler","AcceptHandler|Process|%s|%t\n", self.GetName(), event)
 
 	acceptEvent, ok := self.cast(event)
 	if !ok {
-		return pipe.ERROR_INVALID_EVENT_TYPE
+		return turbo.ERROR_INVALID_EVENT_TYPE
 	}
 
 	switch acceptEvent.msgType {
@@ -82,10 +80,10 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 
 		txData, _ := protocol.MarshalPbMessage(txPacket)
 
-		txResp := packet.NewRespPacket(acceptEvent.opaque, acceptEvent.msgType, txData)
+		txResp := turbo.NewRespPacket(acceptEvent.opaque, acceptEvent.msgType, txData)
 
 		//发送提交结果确认的Packet
-		remotingEvent := pipe.NewRemotingEvent(txResp, []string{acceptEvent.remoteClient.RemoteAddr()})
+		remotingEvent := turbo.NewRemotingEvent(txResp, []string{acceptEvent.remoteClient.RemoteAddr()})
 		ctx.SendForward(remotingEvent)
 		// log.DebugLog("kite_client_handler","AcceptHandler|Recieve TXMessage|%t\n", acceptEvent.Msg)
 
@@ -135,9 +133,9 @@ func (self *AcceptHandler) Process(ctx *pipe.DefaultPipelineContext, event pipe.
 
 		dpacket := protocol.MarshalDeliverAckPacket(message.GetHeader(), succ, err)
 
-		respPacket := packet.NewRespPacket(acceptEvent.opaque, protocol.CMD_DELIVER_ACK, dpacket)
+		respPacket := turbo.NewRespPacket(acceptEvent.opaque, protocol.CMD_DELIVER_ACK, dpacket)
 
-		remotingEvent := pipe.NewRemotingEvent(respPacket, []string{acceptEvent.remoteClient.RemoteAddr()})
+		remotingEvent := turbo.NewRemotingEvent(respPacket, []string{acceptEvent.remoteClient.RemoteAddr()})
 
 		ctx.SendForward(remotingEvent)
 

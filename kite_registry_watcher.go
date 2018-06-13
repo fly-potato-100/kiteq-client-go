@@ -7,6 +7,7 @@ import (
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
 	"github.com/blackbeans/turbo"
+	"kiteq-common/protocol"
 )
 
 func (self *KiteClientManager) NodeChange(path string, eventType registry.RegistryEvent, children []string) {
@@ -50,7 +51,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 				continue
 			}
 			remoteClient = turbo.NewTClient(conn, func() turbo.ICodec {
-				return turbo.LengthBytesCodec{
+				return protocol.KiteQBytesCodec{
 					MaxFrameLength: turbo.MAX_PACKET_BYTES}
 			},
 				func(ctx *turbo.TContext) error{
