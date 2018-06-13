@@ -1,4 +1,4 @@
-package client
+package kiteq_client_go
 
 import (
 	"encoding/base64"
@@ -9,18 +9,17 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	"github.com/blackbeans/kiteq-common/protocol"
-	c "github.com/blackbeans/turbo/client"
-	"github.com/blackbeans/turbo/packet"
+	"github.com/blackbeans/turbo"
 )
 
 type kiteClient struct {
-	remotec *c.RemotingClient
+	client *turbo.TClient
 }
 
-func newKitClient(remoteClient *c.RemotingClient) *kiteClient {
+func newKitClient(c *turbo.TClient) *kiteClient {
 
 	client := &kiteClient{
-		remotec: remoteClient}
+		client: c}
 
 	return client
 }
@@ -78,14 +77,14 @@ var TIMEOUT_ERROR = errors.New("WAIT RESPONSE TIMEOUT ")
 
 func (self *kiteClient) innerSendMessage(cmdType uint8, p []byte, timeout time.Duration) error {
 
-	msgpacket := packet.NewPacket(cmdType, p)
+	msgpacket := turbo.NewPacket(cmdType, p)
 
 	//如果是需要等待结果的则等待
 	if timeout <= 0 {
-		_, err := self.remotec.Write(*msgpacket)
+		_, err := self.client.Write(*msgpacket)
 		return err
 	} else {
-		resp, err := self.remotec.WriteAndGet(*msgpacket, timeout)
+		resp, err := self.client.WriteAndGet(*msgpacket, timeout)
 		if nil != err {
 			return err
 		} else {

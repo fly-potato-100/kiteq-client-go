@@ -3,49 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
-	"kiteq-client-go/client"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"runtime"
 	"runtime/debug"
-	"sync/atomic"
 	"syscall"
 	"time"
 
-	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
+	"github.com/blackbeans/kiteq-client-go/client"
 )
-
-type defualtListener struct {
-	count int32
-	lc    int32
-}
-
-func (self *defualtListener) monitor() {
-	for {
-		tmp := self.count
-		ftmp := self.lc
-
-		time.Sleep(1 * time.Second)
-		fmt.Printf("tps:%d\n", (tmp - ftmp))
-		self.lc = tmp
-	}
-}
-
-func (self *defualtListener) OnMessage(msg *protocol.QMessage) bool {
-	//	log.Info("defualtListener|OnMessage|%s", msg.GetHeader().GetMessageId())
-	atomic.AddInt32(&self.count, 1)
-	return true
-}
-
-func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	log.Info("defualtListener|OnMessageCheck", tx.MessageId)
-	tx.Commit()
-	return nil
-}
 
 func main() {
 	logxml := flag.String("logxml", "../log/log_consumer.xml", "-logxml=../log/log_consumer.xml")
@@ -60,7 +30,7 @@ func main() {
 		log.Info(http.ListenAndServe(":38000", nil))
 	}()
 
-	lis := &defualtListener{}
+	lis := &defaultListener{}
 	go lis.monitor()
 
 	kite := client.NewKiteQClientWithWarmup(*zkhost, "s-mts-test", "123456", *warmingUp, lis)

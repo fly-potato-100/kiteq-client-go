@@ -1,4 +1,4 @@
-package client
+package kiteq_client_go
 
 import (
 	"strings"
@@ -6,10 +6,7 @@ import (
 	"github.com/blackbeans/kiteq-common/registry"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
-	c "github.com/blackbeans/turbo/client"
-	"github.com/blackbeans/turbo/codec"
-	"github.com/blackbeans/turbo/packet"
-	"github.com/blackbeans/turbo/pipe"
+	"github.com/blackbeans/turbo"
 )
 
 func (self *KiteClientManager) NodeChange(path string, eventType registry.RegistryEvent, children []string) {
@@ -44,7 +41,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 	clients := make([]*kiteClient, 0, 10)
 	for _, host := range hosts {
 		//如果能查到remoteClient 则直接复用
-		remoteClient := self.clientManager.FindRemoteClient(host)
+		remoteClient := self.clientManager.FindTClient(host)
 		if nil == remoteClient {
 			//这里就新建一个remote客户端连接
 			conn, err := dial(host)
@@ -52,18 +49,21 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 				log.ErrorLog("kite_client", "KiteClientManager|onQServerChanged|Create REMOTE CLIENT|FAIL|%s|%s\n", err, host)
 				continue
 			}
-			remoteClient = c.NewRemotingClient(conn, func() codec.ICodec {
-				return codec.LengthBasedCodec{
-					MaxFrameLength: packet.MAX_PACKET_BYTES,
-					SkipLength:     4}
+			remoteClient = turbo.NewTClient(conn, func() turbo.ICodec {
+				return turbo.LengthBytesCodec{
+					MaxFrameLength: turbo.MAX_PACKET_BYTES}
 			},
-				func(rc *c.RemotingClient, p *packet.Packet) {
-					event := pipe.NewPacketEvent(rc, p)
+				func(ctx *turbo.TContext) error{
+					p := ctx.Message
+					c := ctx.Client
+					event := turbo.NewPacketEvent(c, p)
 					err := self.pipeline.FireWork(event)
 					if nil != err {
 						log.ErrorLog("kite_client", "KiteClientManager|onPacketRecieve|FAIL|%s|%t\n", err, p)
+						return err
 					}
-				}, self.rc)
+					return nil
+				}, self.config)
 			remoteClient.Start()
 			auth, err := handshake(self.ga, remoteClient)
 			if !auth || nil != err {
@@ -91,12 +91,12 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 			//决定删除的时候必须把所有的当前对应的client遍历一遍不然会删除掉
 			for _, clients := range self.kiteClients {
 				for _, c := range clients {
-					if c.remotec.RemoteAddr() == o.remotec.RemoteAddr() {
+					if c.client.RemoteAddr() == o.client.RemoteAddr() {
 						continue outter
 					}
 				}
 			}
-			del = append(del, o.remotec.RemoteAddr())
+			del = append(del, o.client.RemoteAddr())
 		}
 
 		if len(del) > 0 {

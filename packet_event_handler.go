@@ -1,46 +1,46 @@
-package client
+package kiteq_client_go
 
 import (
 	"errors"
 
 	"github.com/blackbeans/kiteq-common/protocol"
-	. "github.com/blackbeans/turbo/pipe"
-	// 	log "github.com/blackbeans/log4go"
+
+	"github.com/blackbeans/turbo"
 )
 
 //远程操作的PacketHandler
 
 type PacketHandler struct {
-	BaseForwardHandler
+	turbo.BaseForwardHandler
 }
 
 func NewPacketHandler(name string) *PacketHandler {
 	packetHandler := &PacketHandler{}
-	packetHandler.BaseForwardHandler = NewBaseForwardHandler(name, packetHandler)
+	packetHandler.BaseForwardHandler =	turbo. NewBaseForwardHandler(name, packetHandler)
 	return packetHandler
 
 }
 
-func (self *PacketHandler) TypeAssert(event IEvent) bool {
+func (self *PacketHandler) TypeAssert(event turbo.IEvent) bool {
 	_, ok := self.cast(event)
 	return ok
 }
 
-func (self *PacketHandler) cast(event IEvent) (val *PacketEvent, ok bool) {
-	val, ok = event.(*PacketEvent)
+func (self *PacketHandler) cast(event turbo.IEvent) (val *turbo.PacketEvent, ok bool) {
+	val, ok = event.(*turbo.PacketEvent)
 
 	return
 }
 
 var INVALID_PACKET_ERROR = errors.New("INVALID PACKET ERROR")
 
-func (self *PacketHandler) Process(ctx *DefaultPipelineContext, event IEvent) error {
+func (self *PacketHandler) Process(ctx *turbo.DefaultPipelineContext, event turbo.IEvent) error {
 
 	// log.DebugLog("kite_client_handler","PacketHandler|Process|%s|%t\n", self.GetName(), event)
 
 	pevent, ok := self.cast(event)
 	if !ok {
-		return ERROR_INVALID_EVENT_TYPE
+		return turbo.ERROR_INVALID_EVENT_TYPE
 	}
 
 	cevent, err := self.handlePacket(pevent)
@@ -51,12 +51,12 @@ func (self *PacketHandler) Process(ctx *DefaultPipelineContext, event IEvent) er
 	return nil
 }
 
-var eventSunk = &SunkEvent{}
+var eventSunk = &turbo.SunkEvent{}
 
 //对于请求事件
-func (self *PacketHandler) handlePacket(pevent *PacketEvent) (IEvent, error) {
+func (self *PacketHandler) handlePacket(pevent *turbo.PacketEvent) (turbo.IEvent, error) {
 	var err error
-	var event IEvent
+	var event turbo.IEvent
 	packet := pevent.Packet
 	//根据类型反解packet
 	switch packet.Header.CmdType {
@@ -66,7 +66,7 @@ func (self *PacketHandler) handlePacket(pevent *PacketEvent) (IEvent, error) {
 		err = protocol.UnmarshalPbMessage(packet.Data, &auth)
 		if nil == err {
 			pevent.RemoteClient.Attach(packet.Header.Opaque, &auth)
-			event = &SunkEvent{}
+			event = &turbo.SunkEvent{}
 		}
 
 	//心跳
@@ -76,7 +76,7 @@ func (self *PacketHandler) handlePacket(pevent *PacketEvent) (IEvent, error) {
 		if nil == err {
 			hb := &hearbeat
 			// log.DebugLog("kite_client_handler","PacketHandler|handlePacket|HeartBeat|%t\n", hb)
-			event = NewHeartbeatEvent(pevent.RemoteClient, packet.Header.Opaque, hb.GetVersion())
+			event = turbo.NewHeartbeatEvent(pevent.RemoteClient, packet.Header.Opaque, hb.GetVersion())
 		}
 		//消息持久化
 	case protocol.CMD_MESSAGE_STORE_ACK:

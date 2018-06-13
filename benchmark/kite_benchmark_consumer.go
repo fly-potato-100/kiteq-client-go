@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"kiteq-client-go/client"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -17,14 +16,15 @@ import (
 	"github.com/blackbeans/kiteq-common/protocol"
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
+	"github.com/blackbeans/kiteq-client-go/client"
 )
 
-type defualtListener struct {
+type defaultListener struct {
 	count int32
 	lc    int32
 }
 
-func (self *defualtListener) monitor() {
+func (self *defaultListener) monitor() {
 	for {
 		tmp := self.count
 		ftmp := self.lc
@@ -35,14 +35,16 @@ func (self *defualtListener) monitor() {
 	}
 }
 
-func (self *defualtListener) OnMessage(msg *protocol.QMessage) bool {
-//	log.Info("defualtListener|OnMessage|%s", msg.GetHeader().GetMessageId())
+
+
+func (self *defaultListener) OnMessage(msg *protocol.QMessage) bool {
+//	log.Info("defaultListener|OnMessage|%s", msg.GetHeader().GetMessageId())
 	atomic.AddInt32(&self.count, 1)
 	return true
 }
 
-func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	log.Info("defualtListener|OnMessageCheck", tx.MessageId)
+func (self *defaultListener) OnMessageCheck(tx *protocol.TxResponse) error {
+	log.Info("defaultListener|OnMessageCheck", tx.MessageId)
 	tx.Commit()
 	return nil
 }
@@ -59,7 +61,7 @@ func main() {
 		log.Info(http.ListenAndServe(":38000", nil))
 	}()
 
-	lis := &defualtListener{}
+	lis := &defaultListener{}
 	go lis.monitor()
 
 	kite := client.NewKiteQClient(*zkhost, "s-mts-test1", "123456", lis)

@@ -1,20 +1,19 @@
-package client
+package kiteq_client_go
 
 import (
 	"errors"
 	"github.com/blackbeans/kiteq-common/protocol"
 	log "github.com/blackbeans/log4go"
-	c "github.com/blackbeans/turbo/client"
-	"github.com/blackbeans/turbo/packet"
+	"github.com/blackbeans/turbo"
 	"time"
 )
 
 //握手包
-func handshake(ga *c.GroupAuth, remoteClient *c.RemotingClient) (bool, error) {
+func handshake(ga *turbo.GroupAuth, remoteClient *turbo.TClient) (bool, error) {
 
 	for i := 0; i < 3; i++ {
 		p := protocol.MarshalConnMeta(ga.GroupId, ga.SecretKey, int32(ga.WarmingupSec))
-		rpacket := packet.NewPacket(protocol.CMD_CONN_META, p)
+		rpacket := turbo.NewPacket(protocol.CMD_CONN_META, p)
 		resp, err := remoteClient.WriteAndGet(*rpacket, 5*time.Second)
 		if nil != err {
 			//两秒后重试

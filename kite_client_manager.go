@@ -1,4 +1,4 @@
-package client
+package kiteq_client_go
 
 import (
 	"errors"
@@ -15,8 +15,7 @@ import (
 	"github.com/blackbeans/kiteq-common/stat"
 	log "github.com/blackbeans/log4go"
 	"github.com/blackbeans/turbo"
-	c "github.com/blackbeans/turbo/client"
-	"github.com/blackbeans/turbo/pipe"
+	
 )
 
 const (
@@ -29,41 +28,41 @@ type DoTranscation func(message *protocol.QMessage) (bool, error)
 const MAX_CLIENT_CONN = 10
 
 type KiteClientManager struct {
-	ga             *c.GroupAuth
+	ga             *turbo.GroupAuth
 	registryUri    string
 	topics         []string
 	binds          []*bind.Binding //订阅的关系
-	clientManager  *c.ClientManager
+	clientManager  *turbo.ClientManager
 	kiteClients    map[string] /*topic*/ []*kiteClient //topic对应的kiteclient
 	registryCenter *registry.RegistryCenter
-	pipeline       *pipe.DefaultPipeline
+	pipeline       *turbo.DefaultPipeline
 	lock           sync.RWMutex
-	rc             *turbo.RemotingConfig
+	config         *turbo.TConfig
 	flowstat       *stat.FlowStat
 }
 
 func NewKiteClientManager(registryUri, groupId, secretKey string, warmingupSec int, listen IListener) *KiteClientManager {
 
 	flowstat := stat.NewFlowStat()
-	rc := turbo.NewRemotingConfig(
+	config := turbo.NewTConfig(
 		"remoting-"+groupId,
 		50, 16*1024,
 		16*1024, 10000, 10000,
 		10*time.Second, 160000)
 
 	//重连管理器
-	reconnManager := c.NewReconnectManager(true, 30*time.Second, 100, handshake)
+	reconnManager := turbo.NewReconnectManager(true, 30*time.Second, 100, handshake)
 
 	//构造pipeline的结构
-	pipeline := pipe.NewDefaultPipeline()
-	clientm := c.NewClientManager(reconnManager)
+	pipeline := turbo.NewDefaultPipeline()
+	clientm := turbo.NewClientManager(reconnManager)
 	pipeline.RegisteHandler("kiteclient-packet", NewPacketHandler("kiteclient-packet"))
 	pipeline.RegisteHandler("kiteclient-heartbeat", NewHeartbeatHandler("kiteclient-heartbeat", 10*time.Second, 5*time.Second, clientm))
 	pipeline.RegisteHandler("kiteclient-accept", NewAcceptHandler("kiteclient-accept", listen))
-	pipeline.RegisteHandler("kiteclient-remoting", pipe.NewRemotingHandler("kiteclient-remoting", clientm))
+	pipeline.RegisteHandler("kiteclient-remoting", turbo.NewRemotingHandler("kiteclient-remoting", clientm))
 
 	registryCenter := registry.NewRegistryCenter(registryUri)
-	ga := c.NewGroupAuth(groupId, secretKey)
+	ga := turbo.NewGroupAuth(groupId, secretKey)
 	ga.WarmingupSec = warmingupSec
 	manager := &KiteClientManager{
 		ga:             ga,
@@ -71,7 +70,7 @@ func NewKiteClientManager(registryUri, groupId, secretKey string, warmingupSec i
 		topics:         make([]string, 0, 10),
 		pipeline:       pipeline,
 		clientManager:  clientm,
-		rc:             rc,
+		config:         config,
 		flowstat:       flowstat,
 		registryUri:    registryUri,
 		registryCenter: registryCenter}
@@ -84,7 +83,7 @@ func (self *KiteClientManager) remointflow() {
 	go func() {
 		t := time.NewTicker(1 * time.Second)
 		for {
-			ns := self.rc.FlowStat.Stat()
+			ns := self.config.FlowStat.Stat()
 			log.InfoLog("kite_client", "Remoting read:%d/%d\twrite:%d/%d\tdispatcher_go:%d\tconnetions:%d", ns.ReadBytes, ns.ReadCount,
 				ns.WriteBytes, ns.WriteCount, ns.DispatcherGo, self.clientManager.ConnNum())
 			<-t.C

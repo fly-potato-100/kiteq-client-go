@@ -9,7 +9,7 @@ import (
 	log "github.com/blackbeans/log4go"
 	"github.com/golang/protobuf/proto"
 	"io"
-	"kiteq-client-go/client"
+	client "kiteq-client-go"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -26,12 +26,12 @@ type defualtListener struct {
 }
 
 func (self *defualtListener) OnMessage(msg *protocol.QMessage) bool {
-	log.Info("defualtListener|OnMessage", msg.GetHeader(), msg.GetBody())
+	log.Info("defaultListener|OnMessage", msg.GetHeader(), msg.GetBody())
 	return true
 }
 
 func (self *defualtListener) OnMessageCheck(tx *protocol.TxResponse) error {
-	// log.Info("defualtListener|OnMessageCheck", messageId)
+	// log.Info("defaultListener|OnMessageCheck", messageId)
 	tx.Commit()
 	return nil
 }
