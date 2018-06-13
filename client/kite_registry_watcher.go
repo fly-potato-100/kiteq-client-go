@@ -7,7 +7,7 @@ import (
 	"github.com/blackbeans/kiteq-common/registry/bind"
 	log "github.com/blackbeans/log4go"
 	"github.com/blackbeans/turbo"
-	"kiteq-common/protocol"
+	"github.com/blackbeans/kiteq-common/protocol"
 )
 
 func (self *KiteClientManager) NodeChange(path string, eventType registry.RegistryEvent, children []string) {
