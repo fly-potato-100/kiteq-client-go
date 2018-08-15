@@ -228,9 +228,13 @@ func (self *KiteClientManager) selectKiteClient(header *protocol.Header) (*kiteC
 		// 	log.WarnLog("kite_client","KiteClientManager|selectKiteClient|FAIL|NO Remote Client|%s\n", header.GetTopic())
 		return nil, errors.New("NO KITE CLIENT ! [" + header.GetTopic() + "]")
 	}
-
-	c := clients[rand.Intn(len(clients))]
-	return c, nil
+	for i:=0;i<3;i++{
+		c := clients[rand.Intn(len(clients))]
+		if !c.client.IsClosed(){
+			return c,nil
+		}
+	}
+	return nil, errors.New("NO Alive KITE CLIENT ! [" + header.GetTopic() + "]")
 }
 
 func (self *KiteClientManager) Destory() {

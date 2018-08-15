@@ -18,7 +18,7 @@ func (self *KiteClientManager) NodeChange(path string, eventType registry.Regist
 		split := strings.Split(path, "/")
 		if len(split) < 4 {
 			//不合法的订阅璐姐
-			log.WarnLog("kite_client", "KiteClientManager|ChildWatcher|INVALID SERVER PATH |%s|%t\n", path, children)
+			log.WarnLog("kite_client", "KiteClientManager|ChildWatcher|INVALID SERVER PATH |%s|%t", path, children)
 			return
 		}
 		//获取topic
@@ -47,7 +47,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 			//这里就新建一个remote客户端连接
 			conn, err := dial(host)
 			if nil != err {
-				log.ErrorLog("kite_client", "KiteClientManager|onQServerChanged|Create REMOTE CLIENT|FAIL|%s|%s\n", err, host)
+				log.ErrorLog("kite_client", "KiteClientManager|onQServerChanged|Create REMOTE CLIENT|FAIL|%s|%s", err, host)
 				continue
 			}
 			remoteClient = turbo.NewTClient(conn, func() turbo.ICodec {
@@ -60,7 +60,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 					event := turbo.NewPacketEvent(c, p)
 					err := self.pipeline.FireWork(event)
 					if nil != err {
-						log.ErrorLog("kite_client", "KiteClientManager|onPacketRecieve|FAIL|%s|%t\n", err, p)
+						log.ErrorLog("kite_client", "KiteClientManager|onPacketRecieve|FAIL|%s|%t", err, p)
 						return err
 					}
 					return nil
@@ -69,10 +69,13 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 			auth, err := handshake(self.ga, remoteClient)
 			if !auth || nil != err {
 				remoteClient.Shutdown()
-				log.ErrorLog("kite_client", "KiteClientManager|onQServerChanged|HANDSHAKE|FAIL|%s|%s\n", err, auth)
+				log.ErrorLog("kite_client", "KiteClientManager|onQServerChanged|HANDSHAKE|FAIL|%s|%s", err, auth)
 				continue
 			}
 			self.clientManager.Auth(self.ga, remoteClient)
+		}else if remoteClient.IsClosed(){
+			//如果当前是关闭的状态，那么就会自动重连，不需要创建新的连接
+			log.InfoLog("kite_client", "KiteClientManager|onQServerChanged|Closed|Wait Reconnect|%s|%s", topic, hosts)
 		}
 
 		//创建kiteClient
@@ -80,7 +83,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 		clients = append(clients, kiteClient)
 	}
 
-	log.InfoLog("kite_client", "KiteClientManager|onQServerChanged|SUCC|%s|%s\n", topic, hosts)
+	log.InfoLog("kite_client", "KiteClientManager|onQServerChanged|SUCC|%s|%s", topic, hosts)
 
 	//替换掉线的server
 	old, ok := self.kiteClients[topic]
@@ -99,7 +102,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 			}
 			del = append(del, o.client.RemoteAddr())
 		}
-
+		//需要删掉已经废弃的连接
 		if len(del) > 0 {
 			self.clientManager.DeleteClients(del...)
 		}
@@ -108,7 +111,7 @@ func (self *KiteClientManager) onQServerChanged(topic string, hosts []string) {
 
 func (self *KiteClientManager) DataChange(path string, binds []*bind.Binding) {
 	//IGNORE
-	log.InfoLog("kite_client", "KiteClientManager|DataChange|%s|%s\n", path, binds)
+	log.InfoLog("kite_client", "KiteClientManager|DataChange|%s|%s", path, binds)
 }
 
 func (self *KiteClientManager) OnSessionExpired() {
