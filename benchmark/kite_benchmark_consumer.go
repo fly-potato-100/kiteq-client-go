@@ -37,7 +37,7 @@ func main() {
 
 	kite := client.NewKiteQClient(*zkhost, "s-mts-test1", "123456", lis)
 	kite.SetBindings([]*bind.Binding{
-		bind.Bind_Direct("s-mts-test1", "profile", "pay-succ", 8000, true),
+		bind.Bind_Direct("s-mts-test1", "user-profile", "pay-succ", 8000, true),
 	})
 	kite.Start()
 
