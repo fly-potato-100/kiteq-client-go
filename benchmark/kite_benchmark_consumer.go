@@ -21,8 +21,8 @@ import (
 
 
 func main() {
-	logxml := flag.String("logxml", "../log/log_consumer.xml", "-logxml=../log/log_consumer.xml")
-	zkhost := flag.String("registryUri", "etcd://http://localhost:2379", "-registryUri=etcd://http://localhost:2379")
+	logxml := flag.String("logxml", "log/log_consumer.xml", "-logxml=log/log_consumer.xml")
+	zkhost := flag.String("registryUri", "zk://123.206.17.232:2181", "-registryUri=etcd://http://localhost:2379")
 	flag.Parse()
 	runtime.GOMAXPROCS(8)
 
@@ -42,13 +42,13 @@ func main() {
 	kite.Start()
 
 	var s = make(chan os.Signal, 1)
-	signal.Notify(s, syscall.SIGKILL, syscall.SIGUSR1)
+	signal.Notify(s, syscall.SIGKILL, syscall.SIGABRT)
 	//是否收到kill的命令
 	for {
 		cmd := <-s
 		if cmd == syscall.SIGKILL {
 			break
-		} else if cmd == syscall.SIGUSR1 {
+		} else if cmd == syscall.SIGABRT {
 			//如果为siguser1则进行dump内存
 			unixtime := time.Now().Unix()
 			path := "./heapdump-consumer" + fmt.Sprintf("%d", unixtime)

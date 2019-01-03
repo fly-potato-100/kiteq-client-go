@@ -73,11 +73,11 @@ func buildStringMessage(commit bool) *protocol.StringMessage {
 }
 
 func main() {
-	logxml := flag.String("logxml", "../log/log_producer.xml", "-logxml=../log/log_producer.xml")
+	logxml := flag.String("logxml", "log/log_producer.xml", "-logxml=log/log_producer.xml")
 	k := flag.Int("k", 1, "-k=1  //kiteclient num ")
 	c := flag.Int("c", 1, "-c=100")
 	tx := flag.Bool("tx", false, "-tx=true send Tx Message")
-	zkhost := flag.String("registryUri", "etcd://http://localhost:2379", "-registryUri=etcd://http://localhost:2379")
+	zkhost := flag.String("registryUri", "zk://123.206.17.232:2181", "-registryUri=etcd://http://localhost:2379")
 	flag.Parse()
 
 	runtime.GOMAXPROCS(8)
@@ -123,6 +123,8 @@ func main() {
 			go func(kite *client.KiteQClient) {
 				wg.Add(1)
 				for !stop {
+					time.Sleep(1 * time.Second)
+					fmt.Printf("Send One Msg.count=%v\n", count)
 					if *tx {
 						msg := buildBytesMessage(false)
 						err := kite.SendTxBytesMessage(msg, doTranscation)
@@ -151,13 +153,13 @@ func main() {
 		time.Sleep(10 * time.Second)
 
 		var s = make(chan os.Signal, 1)
-		signal.Notify(s, syscall.SIGKILL, syscall.SIGUSR1)
+		signal.Notify(s, syscall.SIGKILL, syscall.SIGSEGV)
 		//是否收到kill的命令
 		for {
 			cmd := <-s
 			if cmd == syscall.SIGKILL {
 				break
-			} else if cmd == syscall.SIGUSR1 {
+			} else if cmd == syscall.SIGSEGV {
 				//如果为siguser1则进行dump内存
 				unixtime := time.Now().Unix()
 				path := "./heapdump-producer" + fmt.Sprintf("%d", unixtime)
