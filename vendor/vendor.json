@@ -1,0 +1,178 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "QCnFFMejpXAC3ph6GM4bk6j2gKc=",
+			"path": "github.com/blackbeans/go-uuid",
+			"revision": "daf03445521218cc55613e799c1c68c0cedfdd7a",
+			"revisionTime": "2016-05-24T09:24:44Z"
+		},
+		{
+			"checksumSHA1": "yJ6+pLllOibGZCIU0wSGdoU1fV0=",
+			"path": "github.com/blackbeans/go-zookeeper/zk",
+			"revision": "e9ca0f2da2a7e4b72457d5a0df3f941caf92954e",
+			"revisionTime": "2016-03-15T04:18:20Z"
+		},
+		{
+			"checksumSHA1": "fEiTkthSBq1LT487uW06X5g2kcA=",
+			"path": "github.com/blackbeans/kiteq-common/protocol",
+			"revision": "bae11c09a69cff8ebaea731ce2b0e6139ec3da26",
+			"revisionTime": "2018-06-13T10:12:11Z"
+		},
+		{
+			"checksumSHA1": "ZF9uPhQL44IcE6U9o6HC9vl/H9E=",
+			"path": "github.com/blackbeans/kiteq-common/registry",
+			"revision": "bae11c09a69cff8ebaea731ce2b0e6139ec3da26",
+			"revisionTime": "2018-06-13T10:12:11Z"
+		},
+		{
+			"checksumSHA1": "YZZbtcuns6dMZCJ6hkzEImv1Mi4=",
+			"path": "github.com/blackbeans/kiteq-common/registry/bind",
+			"revision": "bae11c09a69cff8ebaea731ce2b0e6139ec3da26",
+			"revisionTime": "2018-06-13T10:12:11Z"
+		},
+		{
+			"checksumSHA1": "MaYnsbzjanjUOleAk2/D3m9Juj0=",
+			"path": "github.com/blackbeans/kiteq-common/stat",
+			"revision": "bae11c09a69cff8ebaea731ce2b0e6139ec3da26",
+			"revisionTime": "2018-06-13T10:12:11Z"
+		},
+		{
+			"checksumSHA1": "A7pqP79HsEp0rS+g+lwWETHZ6Ms=",
+			"path": "github.com/blackbeans/kiteq-common/store",
+			"revision": "bae11c09a69cff8ebaea731ce2b0e6139ec3da26",
+			"revisionTime": "2018-06-13T10:12:11Z"
+		},
+		{
+			"checksumSHA1": "LKOKOc8CvKjVE4fo2Zs+O7Lpv2g=",
+			"path": "github.com/blackbeans/log4go",
+			"revision": "a20c293261cf15300d0b49b6bbedb60a9fa6f6f4",
+			"revisionTime": "2017-12-30T16:00:53Z"
+		},
+		{
+			"checksumSHA1": "w1GMRnHBb2GpE8Jd/3+gOjUaMZo=",
+			"path": "github.com/blackbeans/pool",
+			"revision": "36216c1c83508694af4c563ed31c1e416e698d99",
+			"revisionTime": "2018-09-25T06:41:45Z"
+		},
+		{
+			"checksumSHA1": "oKX7kV6aszA3bVD+x3G8tatp1U0=",
+			"path": "github.com/blackbeans/turbo",
+			"revision": "fb4cfe21ff8fe880852cee1c91610ba00fbcc1e4",
+			"revisionTime": "2018-09-24T17:27:17Z"
+		},
+		{
+			"checksumSHA1": "Z0/cgLjXm9GE8erDISVcG21g1Dc=",
+			"path": "github.com/coreos/etcd/client",
+			"revision": "e57f4f420dfea23b66b40ccb9dddad95a622f5af",
+			"revisionTime": "2018-12-12T16:57:45Z"
+		},
+		{
+			"checksumSHA1": "97BsbXOiZ8+Kr+LIuZkQFtSj7H4=",
+			"path": "github.com/coreos/go-semver/semver",
+			"revision": "e214231b295a8ea9479f11b70b35d5acf3556d9b",
+			"revisionTime": "2018-01-08T23:09:05Z"
+		},
+		{
+			"checksumSHA1": "nbCxiVT48CWEg6l8L4SEJ5VfN9c=",
+			"path": "github.com/golang/groupcache/lru",
+			"revision": "c65c006176ff7ff98bb916961c7abbc6b0afc0aa",
+			"revisionTime": "2018-10-24T23:09:25Z"
+		},
+		{
+			"checksumSHA1": "Y2MOwzNZfl4NRNDbLCZa6sgx7O0=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "1d3f30b51784bec5aad268e59fd3c2fc1c2fe73f",
+			"revisionTime": "2018-11-28T19:23:52Z"
+		},
+		{
+			"checksumSHA1": "h1d2lPZf6j2dW/mIqVnd1RdykDo=",
+			"path": "github.com/golang/snappy",
+			"revision": "2e65f85255dbc3072edf28d6b5b8efc472979f5a",
+			"revisionTime": "2018-05-18T05:39:59Z"
+		},
+		{
+			"checksumSHA1": "R6DzcBLEP0BONPpsyr+11N7xh5w=",
+			"path": "github.com/labstack/gommon/color",
+			"revision": "7fd9f68ece0bcb1a905fac8f1549f0083f71c51b",
+			"revisionTime": "2018-11-10T20:33:03Z"
+		},
+		{
+			"checksumSHA1": "KBY5MgEAy+K9li/utcyqc8HOIvc=",
+			"path": "github.com/labstack/gommon/log",
+			"revision": "7fd9f68ece0bcb1a905fac8f1549f0083f71c51b",
+			"revisionTime": "2018-11-10T20:33:03Z"
+		},
+		{
+			"checksumSHA1": "SEnjvwVyfuU2xBaOfXfwPD5MZqk=",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "efa589957cd060542a26d2dd7832fd6a6c6c3ade",
+			"revisionTime": "2018-03-10T13:32:14Z"
+		},
+		{
+			"checksumSHA1": "GiVgQkx5acnq+JZtYiuHPlhHoso=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "3fb116b820352b7f0c281308a4d6250c22d94e27",
+			"revisionTime": "2018-08-30T10:17:45Z"
+		},
+		{
+			"checksumSHA1": "j/aP/n+qaMNBUou/a2m2LDJ5q3Q=",
+			"path": "github.com/ugorji/go/codec",
+			"revision": "772ced7fd4c2f6322c07537a9a93b68d74551fa6",
+			"revisionTime": "2018-12-09T15:14:46Z"
+		},
+		{
+			"checksumSHA1": "ua2PK6PDbNCyzxOmakS3BJoF8Co=",
+			"path": "github.com/valyala/bytebufferpool",
+			"revision": "cdfbe9377474227bb42120c1e22fd4433e7f69bf",
+			"revisionTime": "2018-09-05T18:22:47Z"
+		},
+		{
+			"checksumSHA1": "gtG8jeB0fcTmKZf+6Vbcoa6nfec=",
+			"path": "github.com/valyala/fasttemplate",
+			"revision": "dcecefd839c4193db0d35b88ec65b4c12d360ab0",
+			"revisionTime": "2017-02-24T21:24:29Z"
+		},
+		{
+			"checksumSHA1": "Q4ZZnZeTbMHrXKZxTd6EQjSf4uY=",
+			"path": "go.etcd.io/etcd/pkg/pathutil",
+			"revision": "e57f4f420dfea23b66b40ccb9dddad95a622f5af",
+			"revisionTime": "2018-12-12T16:57:45Z"
+		},
+		{
+			"checksumSHA1": "f0XHkJGhyhBIlx+AuLyv2lc519w=",
+			"path": "go.etcd.io/etcd/pkg/srv",
+			"revision": "e57f4f420dfea23b66b40ccb9dddad95a622f5af",
+			"revisionTime": "2018-12-12T16:57:45Z"
+		},
+		{
+			"checksumSHA1": "VL9HsNKbbCb1Ntj9VcFCfiTmjmM=",
+			"path": "go.etcd.io/etcd/pkg/types",
+			"revision": "e57f4f420dfea23b66b40ccb9dddad95a622f5af",
+			"revisionTime": "2018-12-12T16:57:45Z"
+		},
+		{
+			"checksumSHA1": "Vyt9fFWEV2/sagq9KmkVbPn+LFM=",
+			"path": "go.etcd.io/etcd/version",
+			"revision": "e57f4f420dfea23b66b40ccb9dddad95a622f5af",
+			"revisionTime": "2018-12-12T16:57:45Z"
+		},
+		{
+			"checksumSHA1": "GtamqiJoL7PGHsN454AoffBFMa8=",
+			"path": "golang.org/x/net/context",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "HJCYHqYjA5IaiHXbZrTS3dZY+zU=",
+			"path": "golang.org/x/sys/unix",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "7Ev/X4Xe8P3961myez/hBKO05ig=",
+			"path": "golang.org/x/time/rate",
+			"revision": ""
+		}
+	],
+	"rootPath": "kiteq-client-go"
+}
